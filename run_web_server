@@ -1,0 +1,2 @@
+#screen -t PROJECT_NAME uwsgi uwsgi.ini
+uwsgi uwsgi.ini

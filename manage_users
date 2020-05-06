@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+import yaml, hashlib, os
+
+users = { }; user_names = [ ]
+
+if not os.path.isfile("users.yaml"):
+    print("The file 'users.yaml' does not exists - will create empty file")
+    open("users.yaml", 'w')  #creates empty file (same as 'touch')
+try:
+    users = yaml.load(open("users.yaml"))
+except:
+    print("Could not read valid users.yaml")
+    exit()
+if users == None: users = { }
+if type(users)!=type({ }):
+    print("\nThe file 'users.yaml' does not contain a valid dictionary - Aborting\n")
+    exit()
+os.popen("cp users.yaml old_users.ymal")
+print("Saved a copy of users.yaml to old_users.ymal")
+print
+
+print("-------------Existing users file-------------")
+print( "%11s  %15s %s" % ("user-name", "IP", "hashed pwd") )
+if users:
+    user_names = users.keys(); user_names.sort()
+    for user_name in user_names:
+        user = users[user_name]
+        print( "%11s  %15s %s" % (user_name, user["ip"], user["hashed_pwd"][:11]+"...") )
+print("---------------------------------------------")
+print
+
+ans = raw_input(" q: quit, a: add, d: delete, p: set password, i: set ip > ")
+while ans!="q":
+    if ans == 'a':
+        user_name = raw_input("Enter user name > ")
+        if user_name in user_names:
+            print("User exists - will do nothing")
+        else:
+            ip = raw_input("Enter user ip > ")
+            passwd = raw_input("Enter the user password >")
+            hashed_pwd = hashlib.sha256(passwd).hexdigest()
+            password = None
+            users[user_name] = { "ip": ip, "hashed_pwd": hashed_pwd }
+            yaml.dump(users, open("users.yaml", 'w'))
+    elif ans == 'd':
+        user_name = raw_input("Enter user name > ")
+        if not user_name in user_names:
+            print("User does not exist - will do nothing")
+        else:
+            del users[user_name]
+            yaml.dump(users, open("users.yaml", 'w'))
+    elif ans == 'i':
+        user_name = raw_input("Enter user name > ")
+        if not user_name in user_names:
+            print("User does not exist - will do nothing")
+        else:
+            ip = raw_input("Enter user ip > ")
+            users[user_name]["ip"] = ip
+            yaml.dump(users, open("users.yaml", 'w'))
+    elif ans == 'p':
+        user_name = raw_input("Enter user name > ")
+        if not user_name in user_names:
+            print("User does not exist - will do nothing")
+        else:
+            passwd = raw_input("Enter the user password >")
+            hashed_pwd = hashlib.sha256(passwd).hexdigest()
+            password = None
+            users[user_name]["hashed_pwd"] = hashed_pwd
+            yaml.dump(users, open("users.yaml", 'w'))
+    else:
+        print("Unknown command - will do nothing")
+    ans = raw_input(" q: quit, a: add, d: delete, p: set password, i: set ip > ")
+
